@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Character Counter</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700&family=Karla:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0e0e0e;
+      --surface: #181818;
+      --border: #2a2a2a;
+      --text: #f0ede8;
+      --muted: #666;
+      --accent: #c8f04d;
+      --accent-dark: #9dbf2c;
+    }
+
+    body {
+      font-family: 'Karla', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: 2.2rem;
+      font-weight: 700;
+      letter-spacing: -1px;
+      color: var(--accent);
+    }
+
+    .tagline {
+      font-size: 0.9rem;
+      color: var(--muted);
+      margin-top: 0.25rem;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 640px;
+    }
+
+    textarea {
+      width: 100%;
+      height: 220px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: var(--text);
+      font-family: 'Karla', sans-serif;
+      font-size: 1rem;
+      line-height: 1.7;
+      padding: 1.25rem;
+      resize: vertical;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    textarea::placeholder { color: var(--muted); }
+    textarea:focus { border-color: var(--accent); }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-top: 1rem;
+    }
+
+    .stat {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1rem 0.75rem;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--accent);
+      line-height: 1;
+    }
+
+    .stat-label {
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin-top: 0.4rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 1rem;
+    }
+
+    button {
+      flex: 1;
+      padding: 0.7rem;
+      border-radius: 8px;
+      font-family: 'Karla', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+      border: 1px solid var(--border);
+    }
+
+    .btn-copy {
+      background: var(--accent);
+      color: #0e0e0e;
+      border-color: var(--accent);
+    }
+
+    .btn-copy:hover { background: var(--accent-dark); border-color: var(--accent-dark); }
+
+    .btn-clear {
+      background: transparent;
+      color: var(--muted);
+    }
+
+    .btn-clear:hover { border-color: #555; color: var(--text); }
+
+    .limit-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 1rem;
+    }
+
+    .limit-row label {
+      font-size: 0.82rem;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .limit-row input {
+      width: 90px;
+      padding: 0.4rem 0.6rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-family: 'Karla', sans-serif;
+      font-size: 0.9rem;
+      outline: none;
+    }
+
+    .limit-row input:focus { border-color: var(--accent); }
+
+    .progress-bar {
+      flex: 1;
+      height: 6px;
+      background: var(--border);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 99px;
+      transition: width 0.2s, background 0.2s;
+      width: 0%;
+    }
+
+    .progress-fill.over { background: #ff4d4d; }
+
+    input[type=number]::-webkit-outer-spin-button,
+    input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
+    input[type=number] { -moz-appearance: textfield; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Counter</h1>
+    <p class="tagline">Paste your text. See the numbers.</p>
+  </header>
+
+  <div class="container">
+    <textarea id="input" placeholder="Start typing or paste your text here..."></textarea>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-value" id="chars">0</div>
+        <div class="stat-label">Characters</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value" id="words">0</div>
+        <div class="stat-label">Words</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value" id="sentences">0</div>
+        <div class="stat-label">Sentences</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value" id="readtime">0s</div>
+        <div class="stat-label">Read time</div>
+      </div>
+    </div>
+
+    <div class="limit-row">
+      <label>Char limit</label>
+      <input type="number" id="limit" placeholder="e.g. 280" min="1" />
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress"></div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn-copy" id="copy">Copy text</button>
+      <button class="btn-clear" id="clear">Clear</button>
+    </div>
+  </div>
+
+  <script>
+    const input    = document.getElementById('input');
+    const limitIn  = document.getElementById('limit');
+    const progress = document.getElementById('progress');
+
+    function update() {
+      const text  = input.value;
+      const chars = text.length;
+      const words = text.trim() === '' ? 0 : text.trim().split(/\s+/).length;
+      const sentences = text.trim() === '' ? 0 : (text.match(/[^.!?]*[.!?]+/g) || []).length;
+      const secs  = Math.round((words / 200) * 60);
+      const readtime = secs < 60 ? secs + 's' : Math.ceil(secs / 60) + 'm';
+
+      document.getElementById('chars').textContent     = chars;
+      document.getElementById('words').textContent     = words;
+      document.getElementById('sentences').textContent = sentences;
+      document.getElementById('readtime').textContent  = words === 0 ? '0s' : readtime;
+
+      const lim = parseInt(limitIn.value);
+      if (lim > 0) {
+        const pct = Math.min((chars / lim) * 100, 100);
+        progress.style.width = pct + '%';
+        progress.classList.toggle('over', chars > lim);
+      } else {
+        progress.style.width = '0%';
+        progress.classList.remove('over');
+      }
+    }
+
+    input.addEventListener('input', update);
+    limitIn.addEventListener('input', update);
+
+    document.getElementById('copy').addEventListener('click', () => {
+      if (!input.value) return;
+      navigator.clipboard.writeText(input.value).then(() => {
+        const btn = document.getElementById('copy');
+        btn.textContent = 'Copied!';
+        setTimeout(() => btn.textContent = 'Copy text', 1500);
+      });
+    });
+
+    document.getElementById('clear').addEventListener('click', () => {
+      input.value = '';
+      limitIn.value = '';
+      update();
+    });
+
+    update();
+  </script>
+</body>
+</html>
